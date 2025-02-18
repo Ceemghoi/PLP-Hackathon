@@ -1,46 +1,31 @@
-//1. Palindrome Checker: Develop a Dart function to check if a given string or number is a palindrome, ignoring spaces, punctuation, and case sensitivity.
+class AgriProductValidator {
+  bool isValidProductID(dynamic input) {
+    if (input == null) return false;
+    String str = input.toString();
 
-bool isPalindrome(dynamic input) {
-  // Convert input to string and handle null case
-  if (input == null) return false;
-  String str = input.toString();
+    String cleanStr = str
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s]'), '')
+        .replaceAll(RegExp(r'\s'), '');
 
-  // Clean the string: remove spaces, punctuation, and convert to lowercase
-  String cleanStr = str
-      .toLowerCase()
-      .replaceAll(RegExp(r'[^\w\s]'), '') // Remove punctuation
-      .replaceAll(RegExp(r'\s'), ''); // Remove whitespace
+    if (cleanStr.isEmpty) return false;
 
-  // Handle empty string case
-  if (cleanStr.isEmpty) return false;
-
-  // Compare string with its reverse
-  return cleanStr == cleanStr.split('').reversed.join('');
+    return cleanStr == cleanStr.split('').reversed.join('');
+  }
 }
 
-// Test cases to demonstrate functionality
 void main() {
-  // Simple palindromes
-  print(isPalindrome("radar")); // true
-  print(isPalindrome("level")); // true
+  final validator = AgriProductValidator();
 
-  // Sentences with spaces and punctuation
-  print(isPalindrome("A man, a plan, a canal: Panama!")); // true
-  print(isPalindrome("Race a car")); // false
+  // Test cases for agricultural product IDs
+  print('Testing Product IDs:');
+  print(validator.isValidProductID("CORN121NROC")); // true - Corn product
+  print(validator.isValidProductID("SOY-12321-YOS")); // true - Soybean product
+  print(validator.isValidProductID("WHT-454-THW")); // true - Wheat product
+  print(validator.isValidProductID("FERT-123")); // false - Fertilizer product
 
-  // Numbers
-  print(isPalindrome(12321)); // true
-  print(isPalindrome(12345)); // false
-
-  // Mixed case
-  print(isPalindrome("RaCeCaR")); // true
-
-  // Edge cases
-  print(isPalindrome("")); // false
-  print(isPalindrome(null)); // false
-  print(isPalindrome(" ")); // false
-
-  // Special characters
-  print(isPalindrome("©radar©")); // true
-  print(isPalindrome("!@#\$%")); // false
+  // Test with batch numbers
+  print('\nTesting Batch Numbers:');
+  print(validator.isValidProductID("B12321B")); // true
+  print(validator.isValidProductID("L12345")); // false
 }
