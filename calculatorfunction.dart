@@ -1,138 +1,62 @@
-//3.
-class Calculator {
-  // Store calculation history
-  final List<String> _history = [];
-
-  // Basic arithmetic operations
-  double add(double a, double b) {
-    final result = a + b;
-    _addToHistory('$a + $b = $result');
-    return result;
+class AgriCalculator {
+  // Calculate required fertilizer amount (kg) based on area (hectares) and application rate (kg/ha)
+  double calculateFertilizerAmount(double area, double applicationRate) {
+    return area * applicationRate;
   }
 
-  double subtract(double a, double b) {
-    final result = a - b;
-    _addToHistory('$a - $b = $result');
-    return result;
+  // Calculate expected yield based on historical yield and growth factor
+  double calculateExpectedYield(double historicalYield, double growthFactor) {
+    return historicalYield * growthFactor;
   }
 
-  double multiply(double a, double b) {
-    final result = a * b;
-    _addToHistory('$a × $b = $result');
-    return result;
+  // Calculate water requirements (liters) based on crop type and area (square meters)
+  double calculateWaterRequirement(String cropType, double area) {
+    // Water requirements in liters per square meter per day
+    Map<String, double> waterNeeds = {
+      'corn': 5.0,
+      'wheat': 4.0,
+      'rice': 8.0,
+      'soybean': 4.5,
+    };
+
+    return area * (waterNeeds[cropType.toLowerCase()] ?? 5.0);
   }
 
-  double? divide(double a, double b) {
-    if (b == 0) {
-      _addToHistory('$a ÷ $b = Error: Division by zero');
-      return null;
+  // Calculate profit based on yield (kg), price per kg, and costs
+  double calculateProfit(double yield, double pricePerKg, double costs) {
+    return (yield * pricePerKg) - costs;
+  }
+
+  // Calculate pesticide dilution ratio
+  double calculatePesticideDilution(
+      double concentrateAmount, double waterAmount) {
+    if (waterAmount == 0) {
+      throw ArgumentError('Water amount cannot be zero');
     }
-    final result = a / b;
-    _addToHistory('$a ÷ $b = $result');
-    return result;
-  }
-
-  // Multi-step calculation handler
-  double? calculate(String expression) {
-    try {
-      // Remove spaces and validate input
-      expression = expression.replaceAll(' ', '');
-      if (!RegExp(r'^[0-9+\-*/().]+$').hasMatch(expression)) {
-        throw FormatException('Invalid characters in expression');
-      }
-
-      // Handle parentheses first
-      while (expression.contains('(')) {
-        final openIndex = expression.lastIndexOf('(');
-        final closeIndex = expression.indexOf(')', openIndex);
-        if (closeIndex == -1) throw FormatException('Mismatched parentheses');
-
-        final subExpression = expression.substring(openIndex + 1, closeIndex);
-        final subResult = calculate(subExpression);
-        if (subResult == null) return null;
-
-        expression = expression.replaceRange(
-            openIndex, closeIndex + 1, subResult.toString());
-      }
-
-      // Handle multiplication and division first
-      while (expression.contains(RegExp(r'[*/]'))) {
-        final match =
-            RegExp(r'(\d+\.?\d*)[/](\d+\.?\d)').firstMatch(expression);
-        if (match == null) throw FormatException('Invalid expression');
-
-        final a = double.parse(match.group(1)!);
-        final b = double.parse(match.group(2)!);
-        final op = expression[match.start + match.group(1)!.length];
-
-        double? result;
-        if (op == '*') {
-          result = multiply(a, b);
-        } else {
-          result = divide(a, b);
-          if (result == null) return null;
-        }
-
-        expression =
-            expression.replaceRange(match.start, match.end, result.toString());
-      }
-
-      // Handle addition and subtraction
-      while (expression.contains(RegExp(r'[+\-]'))) {
-        final match =
-            RegExp(r'(\d+\.?\d*)[+\-](\d+\.?\d*)').firstMatch(expression);
-        if (match == null) throw FormatException('Invalid expression');
-
-        final a = double.parse(match.group(1)!);
-        final b = double.parse(match.group(2)!);
-        final op = expression[match.start + match.group(1)!.length];
-
-        final result = op == '+' ? add(a, b) : subtract(a, b);
-
-        expression =
-            expression.replaceRange(match.start, match.end, result.toString());
-      }
-
-      final result = double.parse(expression);
-      _addToHistory('Final result: $result');
-      return result;
-    } catch (e) {
-      _addToHistory('Error: ${e.toString()}');
-      return null;
-    }
-  }
-
-  // History management
-  void _addToHistory(String entry) {
-    _history.add(entry);
-  }
-
-  List<String> getHistory() {
-    return List.from(_history);
-  }
-
-  void clearHistory() {
-    _history.clear();
+    return concentrateAmount / waterAmount;
   }
 }
 
 void main() {
-  final calculator = Calculator();
+  final calculator = AgriCalculator();
 
-  // Basic operations
-  print(calculator.add(5, 3)); // 8.0
-  print(calculator.subtract(10, 4)); // 6.0
-  print(calculator.multiply(6, 7)); // 42.0
-  print(calculator.divide(15, 3)); // 5.0
-  print(calculator.divide(10, 0)); // null (division by zero)
+  // Test calculations
+  print('Fertilizer needed for 10 hectares at 250 kg/ha: '
+      '${calculator.calculateFertilizerAmount(10, 250)} kg');
 
-  // Multi-step calculations
-  print(calculator.calculate('2 + 3 * 4')); // 14.0
-  print(calculator.calculate('(2 + 3) * 4')); // 20.0
-  print(calculator.calculate('10 / (2 + 3)')); // 2.0
-  print(calculator.calculate('10 / (2 - 2)')); // null (division by zero)
+  print('Expected yield from 5000kg historical yield with 1.2 growth factor: '
+      '${calculator.calculateExpectedYield(5000, 1.2)} kg');
 
-  // Print calculation history
-  print('\nCalculation History:');
-  calculator.getHistory().forEach(print);
+  print('Daily water requirement for 1000m² of corn: '
+      '${calculator.calculateWaterRequirement("corn", 1000)} liters');
+
+  print('Profit for 2000kg yield at \$2/kg with \$1000 costs: '
+      '\$${calculator.calculateProfit(2000, 2, 1000)}');
+
+  try {
+    print('Pesticide dilution ratio (100ml:10L): '
+        '${calculator.calculatePesticideDilution(100, 10000)}');
+  } catch (e) {
+    print('Error: $e');
+  }
 }
