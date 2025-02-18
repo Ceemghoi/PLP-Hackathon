@@ -1,81 +1,74 @@
-//2.
 import 'dart:math';
 
-class SortingAlgorithms {
-  // Quicksort implementation
-  List<int> quickSort(List<int> list) {
-    if (list.length <= 1) return list;
+class AgriSorting {
+  // Sort crop yields
+  List<double> sortYields(List<double> yields) {
+    if (yields.isEmpty) return [];
 
-    final pivot = list[list.length ~/ 2];
-    list.removeAt(list.length ~/ 2);
-
-    final less = list.where((element) => element <= pivot).toList();
-    final greater = list.where((element) => element > pivot).toList();
-
-    return [...quickSort(less), pivot, ...quickSort(greater)];
+    List<double> sorted = List.from(yields);
+    sorted.sort();
+    return sorted;
   }
 
-  // Bubble sort implementation
-  List<int> bubbleSort(List<int> list) {
-    List<int> result = List.from(list);
-    int n = result.length;
+  // Sort produce by quality score
+  List<ProduceBatch> sortByQuality(List<ProduceBatch> batches) {
+    if (batches.isEmpty) return [];
 
-    for (int i = 0; i < n - 1; i++) {
-      for (int j = 0; j < n - i - 1; j++) {
-        if (result[j] > result[j + 1]) {
-          // Swap elements
-          int temp = result[j];
-          result[j] = result[j + 1];
-          result[j + 1] = temp;
-        }
-      }
+    List<ProduceBatch> sorted = List.from(batches);
+    sorted.sort((a, b) => b.qualityScore.compareTo(a.qualityScore));
+    return sorted;
+  }
+
+  // Generate random test data
+  List<ProduceBatch> generateTestData(int count) {
+    final random = Random();
+    List<ProduceBatch> batches = [];
+
+    for (int i = 0; i < count; i++) {
+      batches.add(ProduceBatch(
+          id: "BATCH-${i + 1}",
+          cropType: ["Corn", "Wheat", "Soybean", "Rice"][random.nextInt(4)],
+          qualityScore: (random.nextDouble() * 100).roundToDouble(),
+          yield: (random.nextDouble() * 1000).roundToDouble()));
     }
 
-    return result;
+    return batches;
   }
+}
 
-  // Performance comparison function
-  void comparePerformance(int size) {
-    // Generate random list
-    final random = Random();
-    final list = List.generate(size, (_) => random.nextInt(1000));
-    final list2 = List.from(list); // Create a copy for second sort
+class ProduceBatch {
+  final String id;
+  final String cropType;
+  final double qualityScore;
+  final double yield;
 
-    // Test Quicksort
-    final quickStartTime = DateTime.now();
-    final quickSorted = quickSort(List.from(list));
-    final quickDuration = DateTime.now().difference(quickStartTime);
+  ProduceBatch(
+      {required this.id,
+      required this.cropType,
+      required this.qualityScore,
+      required this.yield});
 
-    // Test Bubble sort
-    final bubbleStartTime = DateTime.now();
-    final bubbleSorted = bubbleSort(List.from(list2));
-    final bubbleDuration = DateTime.now().difference(bubbleStartTime);
-
-    // Print results
-    print('Performance comparison for $size elements:');
-    print('Quicksort time: ${quickDuration.inMicroseconds} microseconds');
-    print('Bubble sort time: ${bubbleDuration.inMicroseconds} microseconds');
-    print(
-        'Quicksort is ${bubbleDuration.inMicroseconds / quickDuration.inMicroseconds}x faster');
-
-    // Verify both sorts produced the same result
-    assert(quickSorted.toString() == bubbleSorted.toString(),
-        'Sorting results do not match!');
+  @override
+  String toString() {
+    return 'Batch $id: $cropType (Quality: $qualityScore%, Yield: $yield kg)';
   }
 }
 
 void main() {
-  final sorter = SortingAlgorithms();
+  final sorter = AgriSorting();
 
-  // Example usage
-  final testList = [64, 34, 25, 12, 22, 11, 90];
-  print('Original list: $testList');
-  print('Quicksorted: ${sorter.quickSort(List.from(testList))}');
-  print('Bubble sorted: ${sorter.bubbleSort(List.from(testList))}');
+  // Generate test data
+  final batches = sorter.generateTestData(5);
 
-  // Compare performance with different list sizes
-  [100, 1000, 10000].forEach((size) {
-    sorter.comparePerformance(size);
-    print('---');
-  });
+  print('Original Batches:');
+  batches.forEach(print);
+
+  print('\nSorted by Quality Score:');
+  final sortedBatches = sorter.sortByQuality(batches);
+  sortedBatches.forEach(print);
+
+  // Test yield sorting
+  List<double> yields = batches.map((b) => b.yield).toList();
+  print('\nSorted Yields:');
+  print(sorter.sortYields(yields));
 }
